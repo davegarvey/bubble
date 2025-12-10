@@ -9,7 +9,8 @@
     "type": "module",
     "scripts": {
         "start": "node bin/cli.js",
-        "test": "echo 'No tests specified yet'"
+        "test": "vitest",
+        "test:run": "vitest run"
     },
     "keywords": [
         "github-actions",
@@ -25,6 +26,9 @@
         "commander": "^11.1.0",
         "dotenv": "^16.3.1",
         "openai": "^4.20.1"
+    },
+    "devDependencies": {
+        "vitest": "^1.0.4"
     },
     "engines": {
         "node": ">=18.0.0"
