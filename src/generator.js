@@ -3,7 +3,7 @@
  * @param {Array} commits - Array of commit objects
  * @returns {string} Formatted prompt
  */
-function formatCommitsForAI(commits) {
+export function formatCommitsForAI(commits) {
     let prompt = `Generate professional release notes from the following ${commits.length} commit(s). 
 
 Instructions:
