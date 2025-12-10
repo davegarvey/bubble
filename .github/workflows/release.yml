@@ -18,7 +18,6 @@ jobs:
 
       - name: Generate Release Notes
         run: |
-          npx github:davegarvey/bubble \
-            --latest \
+          npx github:davegarvey/bubble --latest
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
