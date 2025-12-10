@@ -1,0 +1,32 @@
+{
+    "name": "ai-release-notes",
+    "version": "1.0.0",
+    "description": "AI-powered release notes generator for GitHub Actions",
+    "main": "src/index.js",
+    "bin": {
+        "ai-release-notes": "./bin/cli.js"
+    },
+    "type": "module",
+    "scripts": {
+        "start": "node bin/cli.js",
+        "test": "echo 'No tests specified yet'"
+    },
+    "keywords": [
+        "github-actions",
+        "release-notes",
+        "ai",
+        "openai",
+        "cli"
+    ],
+    "author": "",
+    "license": "MIT",
+    "dependencies": {
+        "@octokit/rest": "^20.0.2",
+        "commander": "^11.1.0",
+        "dotenv": "^16.3.1",
+        "openai": "^4.20.1"
+    },
+    "engines": {
+        "node": ">=18.0.0"
+    }
+}
