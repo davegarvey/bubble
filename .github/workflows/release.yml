@@ -20,8 +20,5 @@ jobs:
         run: |
           npx github:davegarvey/bubble \
             --latest \
-            --repo ${{ github.repository }} \
-            --github-token ${{ secrets.GITHUB_TOKEN }} \
-            --api-key ${{ secrets.OPENAI_API_KEY }}
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
