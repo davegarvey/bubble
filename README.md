@@ -50,6 +50,7 @@ Add your OpenAI API key to GitHub Secrets:
 3. Done! `GITHUB_TOKEN` is automatically available
 
 > **Note**: When using `npx github:davegarvey/bubble` in GitHub Actions, the `GITHUB_TOKEN` may not be automatically detected. If you encounter authentication errors, explicitly set the token in your workflow's `env` section:
+>
 > ```yaml
 > env:
 >   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
