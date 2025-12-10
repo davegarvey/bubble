@@ -27,7 +27,6 @@ export class OpenAIProvider extends AIProvider {
                         content: prompt
                     }
                 ],
-                temperature: 0.3,
                 max_completion_tokens: 2000
             });
 
