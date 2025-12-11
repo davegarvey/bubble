@@ -15,22 +15,13 @@ export class OpenAIProvider extends AIProvider {
 
     async generateText(prompt) {
         try {
-            const response = await this.client.chat.completions.create({
+            const response = await this.client.responses.create({
                 model: this.model,
-                messages: [
-                    {
-                        role: 'system',
-                        content: 'You are a helpful assistant that generates clear, concise, and well-structured release notes from git commit messages. Focus on user-facing changes and organize them into logical categories.'
-                    },
-                    {
-                        role: 'user',
-                        content: prompt
-                    }
-                ],
-                max_completion_tokens: 2000
+                instructions: 'You are a helpful assistant that generates clear, concise, and well-structured release notes from git commit messages. Focus on user-facing changes and organize them into logical categories.',
+                input: prompt
             });
 
-            return response.choices[0].message.content.trim();
+            return response.output_text.trim();
         } catch (error) {
             throw new Error(`OpenAI API error: ${error.message}`);
         }
