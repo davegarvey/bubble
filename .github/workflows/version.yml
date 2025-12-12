@@ -1,8 +1,10 @@
 name: Version
 
 on:
-  pull_request:
-    types: [closed]
+  workflow_run:
+    workflows: ["CI"]
+    types:
+      - completed
     branches: [main]
   workflow_dispatch:
 
@@ -20,22 +22,14 @@ jobs:
         with:
           fetch-depth: 0  # Required for commit analysis
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: npm
-
       - name: Configure Git
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run tests
-        run: npm test
-
       - name: Run Bumper (Version + Tag)
-        run: npx github:davegarvey/bumper --tag --push
+        uses: davegarvey/bumper@v1
+        with:
+          push: true
+          tag: true
+          preset: node
