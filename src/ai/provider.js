@@ -8,11 +8,12 @@ export class AIProvider {
     }
 
     /**
-     * Generate release notes from commits
-     * @param {string} prompt - The formatted prompt with commit information
+     * Generate release notes from instructions and input data
+     * @param {string} instructions - System-level instructions for how to process the input
+     * @param {string|object} input - The data to process (can be string or structured object)
      * @returns {Promise<string>} Generated release notes
      */
-    async generateText(prompt) {
+    async generateText(instructions, input) {
         throw new Error('generateText must be implemented by provider');
     }
 

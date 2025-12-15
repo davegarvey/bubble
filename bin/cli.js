@@ -24,6 +24,8 @@ program
     .option('--github-token <token>', 'GitHub token for API access', process.env.GITHUB_TOKEN)
     .option('--dry-run', 'Generate notes without creating release', false)
     .option('--previous-tag <tag>', 'Previous tag to compare against (auto-detected if not provided)')
+    .option('--instructions <text>', 'Custom instructions to replace the default instructions entirely')
+    .option('--instructions-extend <text>', 'Additional instructions to append to the default instructions')
     .parse(process.argv);
 
 const options = program.opts();
@@ -76,7 +78,10 @@ async function main() {
 
         // Generate release notes
         console.log('🤖 Generating release notes with AI...');
-        const releaseNotes = await generateReleaseNotes(commits, aiProvider);
+        const releaseNotes = await generateReleaseNotes(commits, aiProvider, {
+            customInstructions: options.instructions,
+            instructionsExtension: options.instructionsExtend
+        });
 
         console.log('\n' + '='.repeat(80));
         console.log('Generated Release Notes:');
