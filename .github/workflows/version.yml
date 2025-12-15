@@ -23,7 +23,7 @@ jobs:
           fetch-depth: 0  # Required for commit analysis
 
       - name: Run Grubble (Version + Tag)
-        uses: davegarvey/grubble@v4
+        uses: davegarvey/grubble@v4.4.4
         with:
           push: true
           tag: true
