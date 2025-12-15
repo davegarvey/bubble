@@ -11,6 +11,9 @@
   },
   "description": "AI-powered release notes generator for GitHub Actions",
   "devDependencies": {
+    "eslint": "^9.39.2",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
     "vitest": "^1.0.4"
   },
   "engines": {
@@ -29,7 +32,14 @@
   "scripts": {
     "start": "node bin/cli.js",
     "test": "vitest",
-    "test:run": "vitest run"
+    "test:run": "vitest run",
+    "lint": "eslint src/ test/ bin/",
+    "build": "npm run test:run"
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint --fix"
+    ]
   },
   "type": "module",
   "version": "1.1.1"
