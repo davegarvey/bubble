@@ -29,5 +29,3 @@ jobs:
           tag: true
           release-notes: true
           preset: node
-          git-user-name: github-actions[bot]
-          git-user-email: 41898282+github-actions[bot]@users.noreply.github.com
