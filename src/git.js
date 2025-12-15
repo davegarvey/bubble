@@ -51,27 +51,30 @@ export async function getCommitsSinceLastTag(currentTag, previousTag = null) {
 
         // Get commits with subject, body, author, and hash
         // Format: hash|author|date|subject|body
+        // Note: commits with no body will have an extra | before the ||| separator
         const { stdout } = await execAsync(
             `git log ${range} --pretty=format:"%H|%an|%ai|%s|%b|||"`
         );
 
-        if (!stdout.trim()) {
+        if (!stdout || !stdout.trim()) {
             return [];
         }
 
         // Parse commits
+        // Split by ||| and remove the trailing | from entries (from empty body commits)
         const commits = stdout
             .split('|||')
-            .filter(entry => entry.trim())
+            .map(entry => entry.replace(/^\|?\n?/, '')) // Remove leading | or newline
+            .filter(entry => entry && entry.trim())
             .map(entry => {
                 const [hash, author, date, subject, ...bodyParts] = entry.split('|');
                 const body = bodyParts.join('|').trim();
 
                 return {
-                    hash: hash.trim(),
-                    author: author.trim(),
-                    date: date.trim(),
-                    subject: subject.trim(),
+                    hash: hash?.trim() || '',
+                    author: author?.trim() || '',
+                    date: date?.trim() || '',
+                    subject: subject?.trim() || '',
                     body: body || ''
                 };
             })

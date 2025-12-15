@@ -1,14 +1,16 @@
 name: Version
 
 on:
-  pull_request:
-    types: [closed]
+  workflow_run:
+    workflows: ["CI"]
+    types:
+      - completed
     branches: [main]
   workflow_dispatch:
 
 jobs:
   release:
-    if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
+    if: github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     permissions:
       contents: write      # Required for pushing commits/tags
@@ -20,22 +22,12 @@ jobs:
         with:
           fetch-depth: 0  # Required for commit analysis
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Run Grubble (Version + Tag)
+        uses: davegarvey/grubble@v4
         with:
-          node-version: '18'
-          cache: npm
-
-      - name: Configure Git
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run tests
-        run: npm test
-
-      - name: Run Bumper (Version + Tag)
-        run: npx github:davegarvey/bumper --tag --push
+          push: true
+          tag: true
+          release-notes: true
+          preset: node
+          git-user-name: github-actions[bot]
+          git-user-email: 41898282+github-actions[bot]@users.noreply.github.com
