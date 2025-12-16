@@ -138,6 +138,52 @@ describe('generator.js', () => {
             expect(result.input).not.toContain('</readme>');
             expect(result.input).not.toContain('taking into account the project context');
         });
+
+        it('should include commit diffs in input when provided', () => {
+            const commits = [
+                {
+                    hash: 'abc123def456',
+                    author: 'John Doe',
+                    subject: 'feat: add feature',
+                    body: ''
+                }
+            ];
+
+            const commitDiffs = {
+                'abc123def456': 'diff --git a/file.js b/file.js\n+ console.log("hello");'
+            };
+            const result = formatCommitsForAI(commits, { commitDiffs });
+
+            // Check that diffs are wrapped in XML tags in the input
+            expect(result.input).toContain('<diffs>');
+            expect(result.input).toContain('</diffs>');
+            expect(result.input).toContain('diff --git a/file.js b/file.js');
+            expect(result.input).toContain('console.log');
+
+            // Check that instructions mention diffs
+            expect(result.instructions).toContain('Commit diffs wrapped in <diffs> XML tags');
+
+            // Check that final prompt mentions using the diffs
+            expect(result.input).toContain('use the provided diffs to better understand the scope and impact of the changes');
+        });
+
+        it('should not include diffs tags when commitDiffs is not provided', () => {
+            const commits = [
+                {
+                    hash: 'abc123def456',
+                    author: 'John Doe',
+                    subject: 'feat: add feature',
+                    body: ''
+                }
+            ];
+
+            const result = formatCommitsForAI(commits);
+
+            // Check that diffs tags are not present
+            expect(result.input).not.toContain('<diffs>');
+            expect(result.input).not.toContain('</diffs>');
+            expect(result.input).not.toContain('use the provided diffs');
+        });
     });
 
     describe('generateSimpleReleaseNotes', () => {

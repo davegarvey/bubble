@@ -2,7 +2,7 @@
 
 import { Command } from 'commander';
 import dotenv from 'dotenv';
-import { getCommitsSinceLastTag } from '../src/git.js';
+import { getCommitsSinceLastTag, getDiffsSinceLastTag } from '../src/git.js';
 import { generateReleaseNotes } from '../src/generator.js';
 import { createOrUpdateRelease } from '../src/github.js';
 import { getAIProvider } from '../src/ai/provider.js';
@@ -26,6 +26,7 @@ program
     .option('--previous-tag <tag>', 'Previous tag to compare against (auto-detected if not provided)')
     .option('--instructions <text>', 'Custom instructions to replace the default instructions entirely')
     .option('--instructions-extend <text>', 'Additional instructions to append to the default instructions')
+    .option('--include-diffs', 'Include git diffs for each commit to provide more context to AI', false)
     .parse(process.argv);
 
 const options = program.opts();
@@ -70,6 +71,15 @@ async function main() {
 
         console.log(`   Found ${commits.length} commits\n`);
 
+        // Get diffs for commits if requested (optional)
+        let commitDiffs = null;
+        if (options.includeDiffs) {
+            console.log('📋 Fetching commit diffs for additional context...');
+            commitDiffs = await getDiffsSinceLastTag(tag, options.previousTag);
+            const diffCount = Object.keys(commitDiffs).length;
+            console.log(`   Found diffs for ${diffCount} commits\n`);
+        }
+
         // Read README for project context (optional)
         let readmeContent = null;
         try {
@@ -92,7 +102,8 @@ async function main() {
         const releaseNotes = await generateReleaseNotes(commits, aiProvider, {
             customInstructions: options.instructions,
             instructionsExtension: options.instructionsExtend,
-            readmeContent: readmeContent
+            readmeContent: readmeContent,
+            commitDiffs: commitDiffs
         });
 
         console.log('\n' + '='.repeat(80));

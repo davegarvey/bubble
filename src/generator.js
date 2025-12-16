@@ -8,6 +8,7 @@ export function getBaseInstructions() {
 You will receive:
 - Project README wrapped in <readme> XML tags (if available) - use this to understand the project's audience, tone, and technical level
 - Commit data wrapped in <commits> XML tags containing structured JSON
+- Commit diffs wrapped in <diffs> XML tags (if available) - use these to understand the actual code changes
 
 Instructions:`;
 }
@@ -34,10 +35,11 @@ export function getDefaultStyleInstructions() {
  * @param {string} options.customInstructions - Custom instructions to replace the default entirely
  * @param {string} options.instructionsExtension - Additional instructions to append to default
  * @param {string} options.readmeContent - Optional README content for project context
+ * @param {Object} options.commitDiffs - Optional mapping of commit hashes to their diffs
  * @returns {Object} Object with {instructions, input}
  */
 export function formatCommitsForAI(commits, options = {}) {
-    const { customInstructions, instructionsExtension, readmeContent } = options;
+    const { customInstructions, instructionsExtension, readmeContent, commitDiffs } = options;
 
     // Base instructions are always included (technical context)
     const baseInstructions = getBaseInstructions();
@@ -81,10 +83,25 @@ ${readmeContent}
 ${JSON.stringify(commitData, null, 2)}
 </commits>
 
-Please analyze the commits above and generate professional release notes`;
+`;
+
+    // Add diffs if available
+    if (commitDiffs && Object.keys(commitDiffs).length > 0) {
+        input += `<diffs>
+${JSON.stringify(commitDiffs, null, 2)}
+</diffs>
+
+`;
+    }
+
+    input += `Please analyze the commits above and generate professional release notes`;
 
     if (readmeContent) {
         input += `, taking into account the project context and target audience described in the README`;
+    }
+
+    if (commitDiffs && Object.keys(commitDiffs).length > 0) {
+        input += `, and use the provided diffs to better understand the scope and impact of the changes`;
     }
 
     input += '.';
@@ -100,6 +117,7 @@ Please analyze the commits above and generate professional release notes`;
  * @param {string} options.customInstructions - Custom instructions to replace the default entirely
  * @param {string} options.instructionsExtension - Additional instructions to append to default
  * @param {string} options.readmeContent - Optional README content for project context
+ * @param {Object} options.commitDiffs - Optional mapping of commit hashes to their diffs
  * @returns {Promise<string>} Generated release notes
  */
 export async function generateReleaseNotes(commits, aiProvider, options = {}) {

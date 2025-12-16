@@ -94,6 +94,7 @@ Add your OpenAI API key to GitHub Secrets:
 - `--previous-tag <tag>` - Previous tag to compare against (auto-detected if not provided)
 - `--provider <provider>` - AI provider to use (default: `openai`)
 - `--model <model>` - AI model to use (default: `gpt-4-mini`)
+- `--include-diffs` - Include git diffs for each commit to provide more context to AI
 
 ### Prompt Customization (CI/CD)
 

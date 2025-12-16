@@ -112,3 +112,55 @@ export async function getRepoUrl() {
         throw new Error(`Failed to get repository URL: ${error.message}`);
     }
 }
+
+/**
+ * Get diffs for commits between two tags or since a specific tag
+ * @param {string} currentTag - The current/new tag
+ * @param {string|null} previousTag - The previous tag (optional)
+ * @returns {Promise<Object>} Object mapping commit hashes to their diffs
+ */
+export async function getDiffsSinceLastTag(currentTag, previousTag = null) {
+    try {
+        // If no previous tag specified, try to find it
+        if (!previousTag) {
+            previousTag = await getPreviousTag(currentTag);
+        }
+
+        // Build git log command to get diffs
+        let range;
+        if (previousTag) {
+            range = `${previousTag}..${currentTag}`;
+        } else {
+            // If still no previous tag, get all commits up to current tag
+            range = currentTag;
+        }
+
+        // Get diffs for each commit in the range
+        const { stdout } = await execAsync(
+            `git log ${range} --pretty=format:"%H" --no-merges | xargs -I {} sh -c 'echo "COMMIT:{}" && git show {} --pretty=format: --no-merges || true'`
+        );
+
+        if (!stdout || !stdout.trim()) {
+            return {};
+        }
+
+        // Parse the output into a hash -> diff mapping
+        const diffs = {};
+        const sections = stdout.split('COMMIT:').filter(s => s.trim());
+
+        for (const section of sections) {
+            const lines = section.trim().split('\n');
+            const hash = lines[0].trim();
+            const diff = lines.slice(1).join('\n').trim();
+
+            if (hash && diff) {
+                diffs[hash] = diff;
+            }
+        }
+
+        return diffs;
+    } catch (error) {
+        console.warn('Warning: Could not get git diffs:', error.message);
+        return {};
+    }
+}
