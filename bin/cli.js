@@ -70,6 +70,17 @@ async function main() {
 
         console.log(`   Found ${commits.length} commits\n`);
 
+        // Read README for project context (optional)
+        let readmeContent = null;
+        try {
+            const { readFileSync } = await import('fs');
+            readmeContent = readFileSync('README.md', 'utf-8');
+            console.log('📖 Found README.md for project context\n');
+        } catch (error) {
+            // README not found or not readable - continue without it
+            console.log('ℹ️  No README.md found, continuing without project context\n');
+        }
+
         // Initialize AI provider
         const aiProvider = getAIProvider(options.provider, {
             apiKey: options.apiKey,
@@ -80,7 +91,8 @@ async function main() {
         console.log('🤖 Generating release notes with AI...');
         const releaseNotes = await generateReleaseNotes(commits, aiProvider, {
             customInstructions: options.instructions,
-            instructionsExtension: options.instructionsExtend
+            instructionsExtension: options.instructionsExtend,
+            readmeContent: readmeContent
         });
 
         console.log('\n' + '='.repeat(80));

@@ -95,6 +95,49 @@ describe('generator.js', () => {
             expect(result.instructions).not.toContain('This should be ignored');
             expect(result.instructions).not.toContain('Group changes into logical categories');
         });
+
+        it('should include README content in input when provided', () => {
+            const commits = [
+                {
+                    hash: 'abc123def456',
+                    author: 'John Doe',
+                    subject: 'feat: add feature',
+                    body: ''
+                }
+            ];
+
+            const readmeContent = '# My Project\n\nA developer-focused CLI tool for building awesome apps.';
+            const result = formatCommitsForAI(commits, { readmeContent });
+
+            // Check that README is wrapped in XML tags in the input
+            expect(result.input).toContain('<readme>');
+            expect(result.input).toContain('</readme>');
+            expect(result.input).toContain('A developer-focused CLI tool');
+
+            // Check that instructions mention README
+            expect(result.instructions).toContain('Project README');
+
+            // Check that final prompt mentions using the README context
+            expect(result.input).toContain('taking into account the project context');
+        });
+
+        it('should not include README tags when readmeContent is not provided', () => {
+            const commits = [
+                {
+                    hash: 'abc123def456',
+                    author: 'John Doe',
+                    subject: 'feat: add feature',
+                    body: ''
+                }
+            ];
+
+            const result = formatCommitsForAI(commits);
+
+            // Check that README tags are not present
+            expect(result.input).not.toContain('<readme>');
+            expect(result.input).not.toContain('</readme>');
+            expect(result.input).not.toContain('taking into account the project context');
+        });
     });
 
     describe('generateSimpleReleaseNotes', () => {

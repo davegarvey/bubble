@@ -60,9 +60,11 @@ Evaluate changed files in the repository and create commits following the Conven
    - Stage the files for each group.
    - Commit with the generated message.
 
+5. **Review outcome:**
+   - The pre-commit git hook will validate the project. If validation fails, the commit will be aborted - resolve any issues and retry.
+
 ## Constraints
 
-- Project must pass linting and tests before staging and committing.
 - Do not push changes to the remote repository.
 - Do not combine unrelated changes into a single commit.
 - Do not modify the content of the changes; only group, stage and commit.
