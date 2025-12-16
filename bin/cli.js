@@ -2,7 +2,7 @@
 
 import { Command } from 'commander';
 import dotenv from 'dotenv';
-import { getCommitsSinceLastTag } from '../src/git.js';
+import { getCommitsSinceLastTag, getDiffsSinceLastTag } from '../src/git.js';
 import { generateReleaseNotes } from '../src/generator.js';
 import { createOrUpdateRelease } from '../src/github.js';
 import { getAIProvider } from '../src/ai/provider.js';
@@ -24,6 +24,9 @@ program
     .option('--github-token <token>', 'GitHub token for API access', process.env.GITHUB_TOKEN)
     .option('--dry-run', 'Generate notes without creating release', false)
     .option('--previous-tag <tag>', 'Previous tag to compare against (auto-detected if not provided)')
+    .option('--instructions <text>', 'Custom instructions to replace the default instructions entirely')
+    .option('--instructions-extend <text>', 'Additional instructions to append to the default instructions')
+    .option('--include-diffs', 'Include git diffs for each commit to provide more context to AI', false)
     .parse(process.argv);
 
 const options = program.opts();
@@ -68,6 +71,28 @@ async function main() {
 
         console.log(`   Found ${commits.length} commits\n`);
 
+        // Get diffs for commits if requested (optional)
+        let commitDiffs = null;
+        if (options.includeDiffs) {
+            console.log('📋 Fetching commit diffs for additional context...');
+            commitDiffs = await getDiffsSinceLastTag(tag, options.previousTag);
+            const diffCount = Object.keys(commitDiffs).length;
+            console.log(`   Found diffs for ${diffCount} commits\n`);
+        }
+
+        // Read README for project context (optional)
+        let readmeContent = null;
+        if (options.includeReadme) {
+            try {
+                const { readFileSync } = await import('fs');
+                readmeContent = readFileSync('README.md', 'utf-8');
+                console.log('📖 Found README.md for project context\n');
+            } catch (error) {
+                // README not found or not readable - continue without it
+                console.log('ℹ️  No README.md found, continuing without project context\n');
+            }
+        }
+
         // Initialize AI provider
         const aiProvider = getAIProvider(options.provider, {
             apiKey: options.apiKey,
@@ -76,7 +101,12 @@ async function main() {
 
         // Generate release notes
         console.log('🤖 Generating release notes with AI...');
-        const releaseNotes = await generateReleaseNotes(commits, aiProvider);
+        const releaseNotes = await generateReleaseNotes(commits, aiProvider, {
+            customInstructions: options.instructions,
+            instructionsExtension: options.instructionsExtend,
+            readmeContent: readmeContent,
+            commitDiffs: commitDiffs
+        });
 
         console.log('\n' + '='.repeat(80));
         console.log('Generated Release Notes:');

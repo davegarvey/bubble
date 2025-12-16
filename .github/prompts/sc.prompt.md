@@ -62,7 +62,6 @@ Evaluate changed files in the repository and create commits following the Conven
 
 ## Constraints
 
-- Project must pass linting and tests before staging and committing.
 - Do not push changes to the remote repository.
 - Do not combine unrelated changes into a single commit.
 - Do not modify the content of the changes; only group, stage and commit.

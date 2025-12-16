@@ -13,12 +13,12 @@ export class OpenAIProvider extends AIProvider {
         this.model = config.model || 'gpt-5-mini';
     }
 
-    async generateText(prompt) {
+    async generateText(instructions, input) {
         try {
             const response = await this.client.responses.create({
                 model: this.model,
-                instructions: 'You are a helpful assistant that generates clear, concise, and well-structured release notes from git commit messages. Focus on user-facing changes and organize them into logical categories.',
-                input: prompt
+                instructions: instructions,
+                input: input
             });
 
             return response.output_text.trim();
