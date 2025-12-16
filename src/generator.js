@@ -7,8 +7,7 @@ export function getBaseInstructions() {
 
 You will receive:
 - Project README wrapped in <readme> XML tags (if available) - use this to understand the project's audience, tone, and technical level
-- Commit data wrapped in <commits> XML tags containing structured JSON
-- Commit diffs wrapped in <diffs> XML tags (if available) - use these to understand the actual code changes
+- Commit data wrapped in <commits> XML tags containing structured JSON (each commit may include a diff field with code changes)
 
 Instructions:`;
 }
@@ -61,12 +60,21 @@ export function formatCommitsForAI(commits, options = {}) {
     const instructions = `${baseInstructions}\n${styleInstructions}`;
 
     // Format commits as structured data with XML tags for clear data separation
-    const commitData = commits.map(commit => ({
-        subject: commit.subject,
-        author: commit.author,
-        hash: commit.hash.substring(0, 8),
-        body: commit.body || null
-    }));
+    const commitData = commits.map(commit => {
+        const data = {
+            subject: commit.subject,
+            author: commit.author,
+            hash: commit.hash.substring(0, 8),
+            body: commit.body || null
+        };
+        
+        // Add diff to commit object if available
+        if (commitDiffs && commitDiffs[commit.hash]) {
+            data.diff = commitDiffs[commit.hash];
+        }
+        
+        return data;
+    });
 
     // Build input data with optional README context
     let input = '';
@@ -83,25 +91,14 @@ ${readmeContent}
 ${JSON.stringify(commitData, null, 2)}
 </commits>
 
-`;
-
-    // Add diffs if available
-    if (commitDiffs && Object.keys(commitDiffs).length > 0) {
-        input += `<diffs>
-${JSON.stringify(commitDiffs, null, 2)}
-</diffs>
-
-`;
-    }
-
-    input += `Please analyze the commits above and generate professional release notes`;
+Please analyze the commits above and generate professional release notes`;
 
     if (readmeContent) {
         input += `, taking into account the project context and target audience described in the README`;
     }
 
     if (commitDiffs && Object.keys(commitDiffs).length > 0) {
-        input += `, and use the provided diffs to better understand the scope and impact of the changes`;
+        input += `. Use the diff data in each commit to better understand the scope and impact of the changes`;
     }
 
     input += '.';

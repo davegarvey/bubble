@@ -95,6 +95,7 @@ Add your OpenAI API key to GitHub Secrets:
 - `--provider <provider>` - AI provider to use (default: `openai`)
 - `--model <model>` - AI model to use (default: `gpt-4-mini`)
 - `--include-diffs` - Include git diffs for each commit to provide more context to AI
+- `--include-readme` - Include README.md content for project context (default: true)
 
 ### Prompt Customization (CI/CD)
 

@@ -154,17 +154,19 @@ describe('generator.js', () => {
             };
             const result = formatCommitsForAI(commits, { commitDiffs });
 
-            // Check that diffs are wrapped in XML tags in the input
-            expect(result.input).toContain('<diffs>');
-            expect(result.input).toContain('</diffs>');
+            // Check that diff is included in the commit object
             expect(result.input).toContain('diff --git a/file.js b/file.js');
             expect(result.input).toContain('console.log');
+            expect(result.input).toContain('"diff":');
 
-            // Check that instructions mention diffs
-            expect(result.instructions).toContain('Commit diffs wrapped in <diffs> XML tags');
+            // Check that there's no separate <diffs> section
+            expect(result.input).not.toContain('<diffs>');
+
+            // Check that instructions mention diffs in commits
+            expect(result.instructions).toContain('each commit may include a diff field');
 
             // Check that final prompt mentions using the diffs
-            expect(result.input).toContain('use the provided diffs to better understand the scope and impact of the changes');
+            expect(result.input).toContain('Use the diff data in each commit to better understand');
         });
 
         it('should not include diffs tags when commitDiffs is not provided', () => {
@@ -179,10 +181,9 @@ describe('generator.js', () => {
 
             const result = formatCommitsForAI(commits);
 
-            // Check that diffs tags are not present
-            expect(result.input).not.toContain('<diffs>');
-            expect(result.input).not.toContain('</diffs>');
-            expect(result.input).not.toContain('use the provided diffs');
+            // Check that diff field is not in commit objects
+            expect(result.input).not.toContain('"diff":');
+            expect(result.input).not.toContain('Use the diff data');
         });
     });
 
