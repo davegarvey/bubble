@@ -3,7 +3,9 @@
  * @returns {string} Base instructions
  */
 export function getBaseInstructions() {
-    return `You are a professional technical writer that generates release notes from git commit data.
+    return `Role: You are a technical writer specializing in creating clear, user-focused release notes from git commits.
+
+Task: Generate professional release notes from the provided git commits. Organize changes into meaningful categories and write descriptions that help users understand what changed and why it matters to them.
 
 You will receive:
 - Project README wrapped in <readme> XML tags (if available) - use this to understand the project's audience, tone, and technical level
@@ -67,12 +69,12 @@ export function formatCommitsForAI(commits, options = {}) {
             hash: commit.hash.substring(0, 8),
             body: commit.body || null
         };
-        
+
         // Add diff to commit object if available
         if (commitDiffs && commitDiffs[commit.hash]) {
             data.diff = commitDiffs[commit.hash];
         }
-        
+
         return data;
     });
 
