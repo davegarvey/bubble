@@ -34,7 +34,7 @@ This project uses OpenAI's Responses API which properly separates **instructions
 #### 3. `src/generator.js`
 
 - Added `getDefaultInstructions()` function
-- Refactored `formatCommitsForAI()` to return `{instructions, input}` object
+- Refactored `prepareAIPrompt()` to return `{instructions, input}` object
 - Formats commits as structured JSON data
 - Modified `generateReleaseNotes()` to pass instructions and input separately
 

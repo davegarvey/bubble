@@ -55,7 +55,7 @@ CLI Input
   ↓
 generateReleaseNotes(commits, aiProvider, options)
   ↓
-formatCommitsForAI(commits, options)
+prepareAIPrompt(commits, options)
   ├─→ instructions (string)
   └─→ input (structured JSON string)
   ↓
@@ -100,7 +100,7 @@ await this.client.responses.create({
 **Key Functions:**
 
 - `getDefaultInstructions()` - Returns default behavioral rules
-- `formatCommitsForAI(commits, options)` - Returns `{instructions, input}`
+- `prepareAIPrompt(commits, options)` - Returns `{instructions, input}`
 - `generateReleaseNotes(commits, provider, options)` - Orchestrates generation
 
 **Options:**

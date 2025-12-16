@@ -161,7 +161,7 @@ Please analyze the commits above and generate professional release notes.
 
 ## Implementation Checklist
 
-- [x] Update `formatCommitsForAI()` to wrap data in XML tags
+- [x] Update `prepareAIPrompt()` to wrap data in XML tags
 - [x] Update default instructions to reference XML tags
 - [x] Update tests to expect XML-tagged format
 - [x] Verify all tests pass

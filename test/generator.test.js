@@ -1,8 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
-import { formatCommitsForAI, generateReleaseNotes, generateSimpleReleaseNotes } from '../src/generator.js';
+import { prepareAIPrompt, generateReleaseNotes, generateSimpleReleaseNotes } from '../src/generator.js';
 
 describe('generator.js', () => {
-    describe('formatCommitsForAI', () => {
+    describe('prepareAIPrompt', () => {
         it('should format commits with separate instructions and structured input', () => {
             const commits = [
                 {
@@ -19,15 +19,15 @@ describe('generator.js', () => {
                 }
             ];
 
-            const result = formatCommitsForAI(commits);
+            const result = prepareAIPrompt(commits);
 
             // Check that it returns an object with instructions and input
             expect(result).toHaveProperty('instructions');
             expect(result).toHaveProperty('input');
 
             // Check instructions contain default guidelines
-            expect(result.instructions).toContain('Group changes into logical categories');
-            expect(result.instructions).toContain('Focus on user-facing changes');
+            expect(result.instructions).toContain('Group commits into these categories');
+            expect(result.instructions).toContain('Infer the target audience');
 
             // Check input contains structured commit data with XML tags
             expect(result.input).toContain('<commits count="2">');
@@ -48,11 +48,11 @@ describe('generator.js', () => {
                 }
             ];
 
-            const result = formatCommitsForAI(commits, {
+            const result = prepareAIPrompt(commits, {
                 instructionsExtension: '- Include emoji indicators\n- Mention database migrations'
             });
 
-            expect(result.instructions).toContain('Group changes into logical categories');
+            expect(result.instructions).toContain('Group commits into these categories');
             expect(result.instructions).toContain('- Include emoji indicators');
             expect(result.instructions).toContain('- Mention database migrations');
         });
@@ -68,11 +68,11 @@ describe('generator.js', () => {
             ];
 
             const customInstructions = 'Create brief bullet points of changes. Focus on breaking changes only.';
-            const result = formatCommitsForAI(commits, { customInstructions });
+            const result = prepareAIPrompt(commits, { customInstructions });
 
             expect(result.instructions).toContain('Create brief bullet points of changes');
             expect(result.instructions).toContain('Focus on breaking changes only');
-            expect(result.instructions).not.toContain('Group changes into logical categories');
+            expect(result.instructions).not.toContain('Group commits into these categories');
         });
 
         it('should prioritize custom instructions over instructions extension', () => {
@@ -86,14 +86,14 @@ describe('generator.js', () => {
             ];
 
             const customInstructions = 'Custom instructions here.';
-            const result = formatCommitsForAI(commits, {
+            const result = prepareAIPrompt(commits, {
                 customInstructions,
                 instructionsExtension: 'This should be ignored'
             });
 
             expect(result.instructions).toContain('Custom instructions here');
             expect(result.instructions).not.toContain('This should be ignored');
-            expect(result.instructions).not.toContain('Group changes into logical categories');
+            expect(result.instructions).not.toContain('Group commits into these categories');
         });
 
         it('should include README content in input when provided', () => {
@@ -107,7 +107,7 @@ describe('generator.js', () => {
             ];
 
             const readmeContent = '# My Project\n\nA developer-focused CLI tool for building awesome apps.';
-            const result = formatCommitsForAI(commits, { readmeContent });
+            const result = prepareAIPrompt(commits, { readmeContent });
 
             // Check that README is wrapped in XML tags in the input
             expect(result.input).toContain('<readme>');
@@ -117,8 +117,8 @@ describe('generator.js', () => {
             // Check that instructions mention README
             expect(result.instructions).toContain('Project README');
 
-            // Check that final prompt mentions using the README context
-            expect(result.input).toContain('taking into account the project context');
+            // Since branching is now in instructions, check that README is mentioned there
+            expect(result.instructions).toContain('README wrapped in <readme> XML tags');
         });
 
         it('should not include README tags when readmeContent is not provided', () => {
@@ -131,7 +131,7 @@ describe('generator.js', () => {
                 }
             ];
 
-            const result = formatCommitsForAI(commits);
+            const result = prepareAIPrompt(commits);
 
             // Check that README tags are not present
             expect(result.input).not.toContain('<readme>');
@@ -152,7 +152,7 @@ describe('generator.js', () => {
             const commitDiffs = {
                 'abc123def456': 'diff --git a/file.js b/file.js\n+ console.log("hello");'
             };
-            const result = formatCommitsForAI(commits, { commitDiffs });
+            const result = prepareAIPrompt(commits, { commitDiffs });
 
             // Check that diff is included in the commit object
             expect(result.input).toContain('diff --git a/file.js b/file.js');
@@ -163,10 +163,10 @@ describe('generator.js', () => {
             expect(result.input).not.toContain('<diffs>');
 
             // Check that instructions mention diffs in commits
-            expect(result.instructions).toContain('each commit may include a diff field');
+            expect(result.instructions).toContain('each commit includes a diff field');
 
-            // Check that final prompt mentions using the diffs
-            expect(result.input).toContain('Use the diff data in each commit to better understand');
+            // Check that input doesn't have extra instructions about diffs
+            expect(result.input).not.toContain('Use the diff data');
         });
 
         it('should not include diffs tags when commitDiffs is not provided', () => {
@@ -179,7 +179,7 @@ describe('generator.js', () => {
                 }
             ];
 
-            const result = formatCommitsForAI(commits);
+            const result = prepareAIPrompt(commits);
 
             // Check that diff field is not in commit objects
             expect(result.input).not.toContain('"diff":');
@@ -253,7 +253,7 @@ describe('generator.js', () => {
             expect(mockProvider.generateText).toHaveBeenCalledTimes(1);
             const [instructions, input] = mockProvider.generateText.mock.calls[0];
 
-            expect(instructions).toContain('Group changes into logical categories');
+            expect(instructions).toContain('Group commits into these categories');
             expect(input).toContain('feat: add authentication');
             expect(input).toContain('abc123de');
 
@@ -282,7 +282,7 @@ describe('generator.js', () => {
             expect(notes).toContain('Added authentication system');
         });
 
-        it('should pass custom instructions options to formatCommitsForAI', async () => {
+        it('should pass custom instructions options to prepareAIPrompt', async () => {
             const commits = [
                 {
                     hash: 'abc123def456',
@@ -303,10 +303,10 @@ describe('generator.js', () => {
             const [instructions, input] = mockProvider.generateText.mock.calls[0];
 
             expect(instructions).toContain('Create a simple list of changes');
-            expect(instructions).not.toContain('Group changes into logical categories');
+            expect(instructions).not.toContain('Group commits into these categories');
         });
 
-        it('should pass instructions extension options to formatCommitsForAI', async () => {
+        it('should pass instructions extension options to prepareAIPrompt', async () => {
             const commits = [
                 {
                     hash: 'abc123def456',
@@ -327,7 +327,7 @@ describe('generator.js', () => {
             const [instructions, input] = mockProvider.generateText.mock.calls[0];
 
             expect(instructions).toContain('Add emojis');
-            expect(instructions).toContain('Group changes into logical categories');
+            expect(instructions).toContain('Group commits into these categories');
         });
     });
 });
