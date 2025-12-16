@@ -27,20 +27,20 @@
     "cli"
   ],
   "license": "MIT",
-  "main": "src/index.js",
-  "name": "ai-release-notes",
-  "scripts": {
-    "start": "node bin/cli.js",
-    "test": "vitest",
-    "test:run": "vitest run",
-    "lint": "eslint src/ test/ bin/",
-    "build": "npm run test:run"
-  },
   "lint-staged": {
     "*.js": [
       "eslint --fix"
     ]
   },
+  "main": "src/index.js",
+  "name": "ai-release-notes",
+  "scripts": {
+    "build": "npm run test:run",
+    "lint": "eslint src/ test/ bin/",
+    "start": "node bin/cli.js",
+    "test": "vitest",
+    "test:run": "vitest run"
+  },
   "type": "module",
-  "version": "1.1.1"
+  "version": "1.2.0"
 }
